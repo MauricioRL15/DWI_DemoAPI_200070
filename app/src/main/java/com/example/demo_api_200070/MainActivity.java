@@ -40,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private JsonArrayRequest jsonArrayRequest;
     private ArrayList<String> origenDatos = new ArrayList<String>();
     private ArrayAdapter<String> adapter;
+    private String url = "http://10.10.62.17:3300";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,12 +64,45 @@ public class MainActivity extends AppCompatActivity {
         btnGuardar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //listarProductos();
+                JSONObject producto = new JSONObject();
+                try {
+                    producto.put("codigobarras",etCodigoBaras.getText().toString());
+                    producto.put("descripcion",etDescripcion.getText().toString());
+                    producto.put("marca",etMarca.getText().toString());
+                    producto.put("preciocompra",Float.parseFloat(etPrecioCompra.getText().toString()));
+                    producto.put("precioventa",Float.parseFloat(etPrecioVenta.getText().toString()));
+                    producto.put("existencias",Integer.parseInt(etExistencia.getText().toString()));
+                } catch (JSONException e) {
+                    Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+                JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
+                        Request.Method.POST,
+                        url +"/insert",
+                        producto,
+                        new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                try {
+                                    if (response.getString("status").equals("Prodcuto insertado"))
+                                        Toast.makeText(MainActivity.this, "¨Producto insertado con EXITO!", Toast.LENGTH_SHORT).show();
+                                }catch (JSONException e) {
+                                    Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        },
+                        new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                );
+                colaPeticiones.add(jsonObjectRequest);
             }
         });
     }
     protected void listarProductos(){
-        String url = "http://10.10.62.17:3300";
+
         jsonArrayRequest = new JsonArrayRequest(
                 Request.Method.GET,
                 url,
@@ -88,7 +122,6 @@ public class MainActivity extends AppCompatActivity {
                         adapter = new ArrayAdapter<>(MainActivity.this, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item, origenDatos);
                         lvProductos.setAdapter(adapter);
                     }
-
                 },
                 new Response.ErrorListener() {
                     @Override
