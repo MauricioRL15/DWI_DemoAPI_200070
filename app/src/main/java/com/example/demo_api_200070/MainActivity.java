@@ -206,7 +206,7 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void onResponse(JSONObject response) {
                                 try {
-                                    if (response.getString("status").equals("Producto insertado"))
+                                    if (response.getString("status").equals("Producto insertado"));
                                         Toast.makeText(MainActivity.this, "Producto insertado con EXITO!", Toast.LENGTH_SHORT).show();
                                         etCodigoBaras.setText("");
                                         etDescripcion.setText("");
