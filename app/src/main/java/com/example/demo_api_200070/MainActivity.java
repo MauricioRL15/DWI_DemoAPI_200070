@@ -46,7 +46,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        colaPeticiones = Volley.newRequestQueue(this);
         btnGuardar = findViewById(R.id.btnGuardar);
         btnActualizar = findViewById(R.id.btnActualizar);
         btnBuscar = findViewById(R.id.btnBuscar);
@@ -58,8 +57,70 @@ public class MainActivity extends AppCompatActivity {
         etPrecioVenta = findViewById(R.id.etPrecioVenta);
         etExistencia = findViewById(R.id.etExistencia);
         lvProductos = findViewById(R.id.lvProductos);
+        colaPeticiones = Volley.newRequestQueue(this);
         listarProductos();
 
+        //Button update
+        btnActualizar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                JSONObject newproduct = new JSONObject();
+                try {
+                    newproduct.put("codigobarras",etCodigoBaras.getText().toString());
+                    newproduct.put("descripcion",etDescripcion.getText().toString());
+                    newproduct.put("marca",etMarca.getText().toString());
+                    newproduct.put("preciocompra",Float.parseFloat(etPrecioCompra.getText().toString()));
+                    newproduct.put("precioventa",Float.parseFloat(etPrecioVenta.getText().toString()));
+                    newproduct.put("existencias",Float.parseFloat(etExistencia.getText().toString()))
+                } catch (JSONException e) {
+                    Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+                /*JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
+                        Request.Method.POST,
+                        url+"/actualizar/"+etCodigoBaras.getText().toString(),
+                        newproduct,
+
+                );*/
+            }
+        });
+
+        //Button Search:
+        btnBuscar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                JsonObjectRequest peticion = new JsonObjectRequest(
+                        Request.Method.GET,
+                        url + "/" + etCodigoBaras.getText().toString(),
+                        null,
+                        new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                if (response.has("status"))
+                                    Toast.makeText(MainActivity.this, "Producto no encontrado", Toast.LENGTH_SHORT).show();
+                                else {
+                                    try {
+                                        etDescripcion.setText(response.getString("descripcion"));
+                                        etMarca.setText(response.getString("marca"));
+                                        etPrecioCompra.setText(String.valueOf(response.getInt("preciocompra")));
+                                        etPrecioVenta.setText(String.valueOf(response.getInt("precioventa")));
+                                        etExistencia.setText(String.valueOf(response.getInt("existencias")));
+                                    } catch (JSONException e) {
+                                        Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                            }
+
+                                },
+                        new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                );
+                colaPeticiones.add(peticion);
+            }
+        });
 
         btnGuardar.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -71,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
                     producto.put("marca",etMarca.getText().toString());
                     producto.put("preciocompra",Float.parseFloat(etPrecioCompra.getText().toString()));
                     producto.put("precioventa",Float.parseFloat(etPrecioVenta.getText().toString()));
-                    producto.put("existencias",Integer.parseInt(etExistencia.getText().toString()));
+                    producto.put("existencias",Float.parseFloat(etExistencia.getText().toString()));
                 } catch (JSONException e) {
                     Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
@@ -112,9 +173,10 @@ public class MainActivity extends AppCompatActivity {
                     public void onResponse(JSONArray response) {
                         for(int i = 0 ; i<response.length();i++){
                             try {
+                                String codigobarras = response.getJSONObject(i).getString("codigobarras");
                                 String descripcion = response.getJSONObject(i).getString("descripcion");
                                 String marca = response.getJSONObject(i).getString("marca");
-                                origenDatos.add(descripcion+" -> "+marca);
+                                origenDatos.add(codigobarras+" -> "+descripcion+" -> "+marca);
                             } catch (JSONException e) {
 
                             }
