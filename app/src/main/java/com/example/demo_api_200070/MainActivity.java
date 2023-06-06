@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private JsonArrayRequest jsonArrayRequest;
     private ArrayList<String> origenDatos = new ArrayList<String>();
     private ArrayAdapter<String> adapter;
-    private String url = "http://10.10.62.17:3300";
+    private String url = "http://192.168.3.5:3300";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,27 +60,89 @@ public class MainActivity extends AppCompatActivity {
         colaPeticiones = Volley.newRequestQueue(this);
         listarProductos();
 
+        //Delete button
+        btnEliminar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
+                        Request.Method.DELETE,
+                        url + "/borrar/" + etCodigoBaras.getText().toString(),
+                        null,
+                        new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                try {
+                                    if (response.getString("status").equals("Producto eliminado")) {
+                                        Toast.makeText(MainActivity.this, "Producto actualizado con EXITO!", Toast.LENGTH_SHORT).show();
+                                        etCodigoBaras.setText("");
+                                        adapter.clear();
+                                        lvProductos.setAdapter(adapter);
+                                        listarProductos();
+                                    }
+                                } catch (JSONException e) {
+                                    Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        },
+                        new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                );
+                colaPeticiones.add(jsonObjectRequest);
+            }
+        });
+
+
         //Button update
         btnActualizar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                JSONObject newproduct = new JSONObject();
+                JSONObject producto  = new JSONObject();
                 try {
-                    newproduct.put("codigobarras",etCodigoBaras.getText().toString());
-                    newproduct.put("descripcion",etDescripcion.getText().toString());
-                    newproduct.put("marca",etMarca.getText().toString());
-                    newproduct.put("preciocompra",Float.parseFloat(etPrecioCompra.getText().toString()));
-                    newproduct.put("precioventa",Float.parseFloat(etPrecioVenta.getText().toString()));
-                    newproduct.put("existencias",Float.parseFloat(etExistencia.getText().toString()))
+                    producto .put("codigobarras",etCodigoBaras.getText().toString());
+                    producto .put("descripcion",etDescripcion.getText().toString());
+                    producto .put("marca",etMarca.getText().toString());
+                    producto .put("preciocompra",Float.parseFloat(etPrecioCompra.getText().toString()));
+                    producto .put("precioventa",Float.parseFloat(etPrecioVenta.getText().toString()));
+                    producto .put("existencias",Float.parseFloat(etExistencia.getText().toString()));
                 } catch (JSONException e) {
                     Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
-                /*JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
-                        Request.Method.POST,
-                        url+"/actualizar/"+etCodigoBaras.getText().toString(),
-                        newproduct,
-
-                );*/
+                JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
+                        Request.Method.PUT,
+                        url + "/actualizar/" + etCodigoBaras.getText().toString(),
+                        producto,
+                        new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                try {
+                                    if (response.getString("status").equals("Producto actualizado"));
+                                    Toast.makeText(MainActivity.this, "Producto actualizado con EXITO!", Toast.LENGTH_SHORT).show();
+                                    etCodigoBaras.setText("");
+                                    etDescripcion.setText("");
+                                    etMarca.setText("");
+                                    etPrecioCompra.setText("");
+                                    etPrecioVenta.setText("");
+                                    etExistencia.setText("");
+                                    adapter.clear();
+                                    lvProductos.setAdapter(adapter);
+                                    listarProductos();
+                                } catch (JSONException e) {
+                                    Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        },
+                        new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                Toast.makeText(MainActivity.this, error.getMessage() , Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                );
+                colaPeticiones.add(jsonObjectRequest);
             }
         });
 
@@ -121,7 +183,7 @@ public class MainActivity extends AppCompatActivity {
                 colaPeticiones.add(peticion);
             }
         });
-
+        //Button Save
         btnGuardar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -144,8 +206,17 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void onResponse(JSONObject response) {
                                 try {
-                                    if (response.getString("status").equals("Prodcuto insertado"))
-                                        Toast.makeText(MainActivity.this, "¨Producto insertado con EXITO!", Toast.LENGTH_SHORT).show();
+                                    if (response.getString("status").equals("Producto insertado"))
+                                        Toast.makeText(MainActivity.this, "Producto insertado con EXITO!", Toast.LENGTH_SHORT).show();
+                                        etCodigoBaras.setText("");
+                                        etDescripcion.setText("");
+                                        etMarca.setText("");
+                                        etPrecioCompra.setText("");
+                                        etPrecioVenta.setText("");
+                                        etExistencia.setText("");
+                                        adapter.clear();
+                                        lvProductos.setAdapter(adapter);
+                                        listarProductos();
                                 }catch (JSONException e) {
                                     Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
                                 }
@@ -162,6 +233,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+    //list products
     protected void listarProductos(){
 
         jsonArrayRequest = new JsonArrayRequest(
