@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
                             public void onResponse(JSONObject response) {
                                 try {
                                     if (response.getString("status").equals("Producto eliminado")) {
-                                        Toast.makeText(MainActivity.this, "Producto actualizado con EXITO!", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(MainActivity.this, "Producto Eliminado con EXITO!", Toast.LENGTH_SHORT).show();
                                         etCodigoBaras.setText("");
                                         adapter.clear();
                                         lvProductos.setAdapter(adapter);
