@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private JsonArrayRequest jsonArrayRequest;
     private ArrayList<String> origenDatos = new ArrayList<String>();
     private ArrayAdapter<String> adapter;
-    private String url = "http://10.10.62.24:3000";
+    private String url = "http://192.168.3.5:3000";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,7 +97,6 @@ public class MainActivity extends AppCompatActivity {
                 colaPeticiones.add(jsonObjectRequest);
             }
         });
-
 
         //Button update
         btnActualizar.setOnClickListener(new View.OnClickListener() {
